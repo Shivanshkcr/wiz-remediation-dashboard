@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Posture Improvement Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+</script>
+
+<style>
+
+.net-positive{
+    color:#00E676;
+    font-weight:700;
+
+    text-shadow:
+        0 0 8px rgba(212,175,55,.45),
+        0 0 15px rgba(212,175,55,.25),
+        0 0 25px rgba(212,175,55,.15);
+}
+
+.net-negative{
+    color:#FF6B6B;
+    font-weight:700;
+
+    text-shadow:
+        0 0 8px rgba(255,107,107,.35);
+}
+.card h2{
+    font-size:56px;
+    font-weight:700;
+}
+``
+.card.opened-card h2{
+    color:#FF8C00 !important;
+
+    text-shadow:
+        0 0 12px rgba(255,140,0,.6),
+        0 0 24px rgba(255,140,0,.3);
+}
+
+.card.resolved-card h2{
+    color:#00D26A !important;
+
+    text-shadow:
+        0 0 12px rgba(0,210,106,.6),
+        0 0 24px rgba(0,210,106,.3);
+}
+
+.card.net-card h2{
+    color:#D4AF37 !important;
+
+    text-shadow:
+        0 0 12px rgba(212,175,55,.6),
+        0 0 24px rgba(212,175,55,.3);
+}
+
+.chart-container{
+    width:70%;
+    height:320px;
+    margin:auto;
+    padding-top:10px;
+}
+
+canvas{
+    max-width:100%;
+}
+
+.card{
+    transition:all .35s ease;
+}
+
+.card:hover{
+    transform:translateY(-8px) scale(1.03);
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.5),
+        0 0 20px rgba(212,175,55,.25);
+}
+
+.section{
+    transition:all .35s ease;
+}
+
+.section:hover{
+    transform:translateY(-4px);
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.55),
+        0 0 25px rgba(212,175,55,.08);
+}
+
+tr{
+    transition:all .25s ease;
+}
+
+tr:hover{
+    background:#232323;
+}
+
+.gold-divider{
+    width:120px;
+    height:3px;
+    background:#D4AF37;
+    margin:0 auto 20px auto;
+    border-radius:4px;
+    box-shadow:0 0 12px rgba(212,175,55,.5);
+}
+.chart-container{
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:
+    radial-gradient(circle at top left,#1c1c1c,#0b0b0b 45%);
+    color:#f5f5f5;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+    color:#D4AF37;
+    font-size:40px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#bdbdbd;
+    margin-bottom:30px;
+    font-size:15px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.card{
+    background:linear-gradient(145deg,#1b1b1b,#101010);
+    border:1px solid rgba(212,175,55,.25);
+    border-radius:18px;
+    padding:25px;
+    text-align:center;
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.5),
+        0 0 15px rgba(212,175,55,.05);
+}
+
+.card h2{
+    color:#F4D03F;
+    font-size:42px;
+    font-weight:700;
+}
+
+.card p{
+    color:#d1d1d1;
+    margin-top:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+.section{
+    background:#141414;
+    border:1px solid rgba(212,175,55,.20);
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:25px;
+    box-shadow:
+        0 8px 28px rgba(0,0,0,.45);
+}
+
+.section h2{
+    color:#D4AF37;
+    margin-bottom:15px;
+    padding-left:12px;
+    border-left:4px solid #D4AF37;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:12px;
+}
+
+th{
+    background:#D4AF37;
+    color:#000;
+    padding:14px;
+    font-weight:700;
+}
+
+td{
+    text-align:center;
+    padding:12px;
+    border-bottom:1px solid rgba(212,175,55,.10);
+}
+
+tr:nth-child(even){
+    background:#181818;
+}
+
+tr:hover{
+    background:#232323;
+}
+
+.total-row{
+    background:#D4AF37 !important;
+    color:#000;
+    font-weight:bold;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
+
+.summary{
+    background:
+    linear-gradient(
+        135deg,
+        rgba(212,175,55,.07),
+        rgba(212,175,55,.02)
+    );
+
+    border:1px solid rgba(212,175,55,.25);
+    border-radius:15px;
+    padding:20px;
+}
+
+.summary ul{
+    padding-left:20px;
+}
+
+.summary li{
+    margin-bottom:12px;
+}
+
+.footer{
+    text-align:center;
+    color:#888;
+    margin-top:30px;
+    padding-top:20px;
+    border-top:1px solid rgba(212,175,55,.15);
+}
+
+@media(max-width:900px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+/* OPENED */
+.card.opened-card h2{
+    color:#FF8C00 !important;
+
+    text-shadow:
+        0 0 15px rgba(255,140,0,.8),
+        0 0 30px rgba(255,140,0,.45),
+        0 0 45px rgba(255,140,0,.25);
+}
+
+/* RESOLVED */
+.card.resolved-card h2{
+    color:#00D26A !important;
+
+    text-shadow:
+        0 0 15px rgba(0,210,106,.8),
+        0 0 30px rgba(0,210,106,.45),
+        0 0 45px rgba(0,210,106,.25);
+}
+
+/* NET IMPROVEMENT */
+.card.net-card h2{
+    color:#00E676 !important;
+
+text-shadow:
+    0 0 15px rgba(0,230,118,.7),
+    0 0 30px rgba(0,230,118,.4);
+}
+</style>
+</head>
+<body>
+
+<h1>Security Posture Improvement Report</h1>
+
+<div class="gold-divider"></div>
+
+<div class="subtitle">
+Compass India & SmartQ | 1st July 2026 - 17th Aug 2026
+</div>
+
+<!-- KPI CARDS -->
+<div class="cards">
+
+    <div class="card opened-card">
+        <h2 class="counter" data-target="974">0</h2>
+        <p>TOTAL OPENED</p>
+    </div>
+
+    <div class="card resolved-card">
+        <h2 class="counter" data-target="1464">0</h2>
+        <p>TOTAL RESOLVED</p>
+    </div>
+
+    <div class="card net-card">
+        <h2 class="counter" data-target="490">0</h2>
+        <p>NET IMPROVEMENT</p>
+    </div>
+
+</div>
+</div>
+
+<!-- COMPASS INDIA -->
+
+<div class="section">
+    <h2>Compass India</h2>
+
+    <table>
+       <tr>
+    <th>Severity</th>
+    <th>Opened</th>
+    <th>Resolved</th>
+    <th class="net-header">Net Improvement</th>
+</tr>
+
+        <tr>
+            <td>Critical</td>
+            <td>0</td>
+            <td>4</td>
+            <td class="net-positive">+4</td>
+        </tr>
+
+        <tr>
+            <td>High</td>
+            <td>15</td>
+            <td>19</td>
+            <td class="net-positive">+4</td>
+        </tr>
+
+        <tr>
+            <td>Medium</td>
+            <td>498</td>
+            <td>738</td>
+	    <td class="net-positive">+240</td>
+        </tr>
+
+        <tr>
+            <td>Low</td>
+            <td>66</td>
+            <td>60</td>
+            <td>-6</td>
+        </tr>
+
+        <tr class="total-row">
+            <td>Total</td>
+            <td>579</td>
+            <td>821</td>
+            <td>+242</td>
+        </tr>
+
+    </table>
+</div>
+
+<!-- SMARTQ -->
+
+<div class="section">
+    <h2>SmartQ</h2>
+
+    <table>
+        <tr>
+            <th>Severity</th>
+            <th>Opened</th>
+            <th>Resolved</th>   
+            <th class="net-header">Net Improvement</th>
+        </tr>
+
+        <tr>
+            <td>Critical</td>
+            <td>6</td>
+            <td>13</td>
+            <td class="net-positive">+7</td>
+        </tr>
+
+        <tr>
+            <td>High</td>
+            <td>54</td>
+            <td>122</td>
+            <td class="net-positive">+68</td>
+        </tr>
+
+        <tr>
+            <td>Medium</td>
+            <td>268</td>
+            <td>420</td>
+            <td class="net-positive">+152</td>
+        </tr>
+
+        <tr>
+            <td>Low</td>
+            <td>67</td>
+            <td>88</td>
+            <td class="net-positive">+21</td>
+        </tr>
+
+        <tr class="total-row">
+            <td>Total</td>
+            <td>395</td>
+            <td>643</td>
+            <td>+248</td>
+        </tr>
+
+    </table>
+</div>
+
+<!-- COMBINED -->
+
+<div class="section">
+    <h2>Combined Impact (Compass India + SmartQ)</h2>
+
+    <table>
+        <tr>
+            <th>Severity</th>
+            <th>Opened</th>
+            <th>Resolved</th>
+            <th>Net Improvement</th>
+        </tr>
+
+        <tr>
+            <td>Critical</td>
+            <td>6</td>
+            <td>17</td>
+            <td class="net-positive">+11</td>
+        </tr>
+
+        <tr>
+            <td>High</td>
+            <td>69</td>
+            <td>141</td>
+            <td class="net-positive">+72</td>
+        </tr>
+
+        <tr>
+            <td>Medium</td>
+            <td>766</td>
+            <td>1158</td>
+            <td class="net-positive">+392</td>
+        </tr>
+
+        <tr>
+            <td>Low</td>
+            <td>133</td>
+            <td>148</td>
+            <td class="net-positive">+15</td>
+        </tr>
+
+        <tr class="total-row">
+            <td>Total</td>
+            <td>974</td>
+            <td>1464</td>
+            <td>+490</td>
+        </tr>
+
+    </table>
+</div>
+
+<!-- CHARTS -->
+
+<div class="grid">
+
+<div class="section">
+<h2>Opened vs Resolved</h2>
+<canvas id="barChart"></canvas>
+</div>
+
+<div class="section">
+<h2>Net Improvement</h2>
+<div class="chart-container">
+    <canvas id="pieChart"></canvas>
+</div>
+</div>
+
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+
+<div class="section">
+
+<h2>Executive Summary</h2>
+
+<div class="summary">
+
+<ul>
+<li><strong>1,464 vulnerabilities resolved</strong> across Compass India and SmartQ.</li>
+
+<li><strong>743 vulnerabilities fixed</strong> through remediation efforts.</li>
+
+<li><strong>490 net issue reduction</strong> achieved across both environments.</li>
+
+<li><strong>17 Critical vulnerabilities resolved</strong> with minimal new Critical exposure.</li>
+
+<li><strong>1,158 Medium severity vulnerabilities resolved</strong>, contributing the largest overall risk reduction.</li>
+
+<li>Compass India remediation performance is reported through <strong>Aug 17, 2026</strong>. Findings introduced from Aug 18 onward due to GCP onboarding are excluded from remediation performance measurement.</li>
+
+<li>Overall remediation efforts consistently outperformed vulnerability discovery and reduced risk exposure across monitored assets.</li>
+</ul>
+
+</div>
+
+</div>
+
+<div class="footer">
+Generated from Wiz Security Metrics | Compass India & SmartQ Remediation Dashboard
+</div>
+
+<script>
+
+Chart.defaults.color='#E5E5E5';
+
+new Chart(
+document.getElementById('barChart'),
+{
+type:'bar',
+data:{
+labels:['Compass India','SmartQ'],
+datasets:[
+{
+label:'Opened',
+data:[579,395],
+backgroundColor:'#D35400'
+},
+{
+label:'Resolved',
+data:[821,643],
+backgroundColor:'#D4AF37'
+}
+]
+},
+options:{
+plugins:{
+legend:{
+labels:{
+color:'#fff'
+}
+}
+},
+scales:{
+y:{
+ticks:{color:'#fff'},
+grid:{color:'#333'}
+},
+x:{
+ticks:{color:'#fff'},
+grid:{color:'#333'}
+}
+}
+}
+}
+);
+
+// Premium Glow Plugin
+const premiumGlowPlugin = {
+    id: 'premiumGlow',
+    beforeDatasetsDraw(chart) {
+        const { ctx } = chart;
+
+        ctx.save();
+
+        // Global glow
+        ctx.shadowBlur = 35;
+        ctx.shadowColor = 'rgba(212,175,55,0.35)';
+    },
+
+    afterDatasetsDraw(chart) {
+        chart.ctx.restore();
+    }
+};
+
+Chart.register(premiumGlowPlugin);
+
+new Chart(
+    document.getElementById('pieChart'),
+    {
+        type: 'doughnut',
+
+        data: {
+            labels: [
+                'Compass India (+242)',
+                'SmartQ (+248)'
+            ],
+
+            datasets: [{
+                data: [242, 248],
+
+                backgroundColor: [
+                    '#D4AF37', // Compass India Gold
+                    '#FF8C00'  // SmartQ Orange
+                ],
+
+                borderColor: [
+                    '#F8D568', // Premium Gold Border
+                    '#FFC266'  // Premium Orange Border
+                ],
+
+                borderWidth: 4,
+
+                hoverBorderWidth: 7,
+
+                hoverOffset: 18,
+
+                spacing: 3,
+
+                borderRadius: 6
+            }]
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            cutout: '68%',
+
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1800
+            },
+
+            plugins: {
+
+                legend: {
+
+                    position: 'top',
+
+                    labels: {
+
+                        color: '#FFFFFF',
+
+                        padding: 20,
+
+                        usePointStyle: true,
+
+                        pointStyle: 'circle',
+
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+
+                tooltip: {
+
+                    backgroundColor: '#111111',
+
+                    borderColor: '#D4AF37',
+
+                    borderWidth: 1,
+
+                    titleColor: '#D4AF37',
+
+                    bodyColor: '#FFFFFF',
+
+                    padding: 12,
+
+                    displayColors: true
+                }
+            }
+        },
+
+        plugins: [premiumGlowPlugin]
+    }
+);
+document.querySelectorAll('.counter').forEach(counter => {
+
+    const target = +counter.getAttribute('data-target');
+
+    let current = 0;
+
+    const updateCount = () => {
+
+        const difference = target - current;
+
+        const increment = Math.max(difference * 0.02, 1);
+
+        current += increment;
+
+        if(current < target){
+
+            counter.innerText =
+                Math.floor(current).toLocaleString();
+
+            requestAnimationFrame(updateCount);
+
+        }else{
+
+            counter.innerText =
+                target.toLocaleString();
+        }
+    };
+
+    updateCount();
+
+});
+</script>
+
+</body>
+</html>
